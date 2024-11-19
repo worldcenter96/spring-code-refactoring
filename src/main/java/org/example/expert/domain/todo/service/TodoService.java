@@ -1,5 +1,8 @@
 package org.example.expert.domain.todo.service;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.example.expert.client.WeatherClient;
 import org.example.expert.domain.common.dto.AuthUser;
@@ -26,6 +29,7 @@ public class TodoService {
 
     private final TodoRepository todoRepository;
     private final WeatherClient weatherClient;
+
 
     @Transactional(readOnly = false)
     public TodoSaveResponse saveTodo(AuthUser authUser, TodoSaveRequest todoSaveRequest) {
@@ -55,7 +59,6 @@ public class TodoService {
 
         Page<Todo> todos = null;
 
-
         if (weather != null) {
             // weather 조건별 조회
             todos = todoRepository.findByWeatherOrderByModifiedAtDesc(startDate, endDate, weather, pageable);
@@ -63,9 +66,6 @@ public class TodoService {
             // 전체 조회 & 기간별 조회
             todos = todoRepository.findAllByModifiedAtOrderByModifiedAtDesc(startDate, endDate, pageable);
         }
-
-
-
 
         return todos.map(todo -> new TodoResponse(
                 todo.getId(),
@@ -79,6 +79,7 @@ public class TodoService {
     }
 
     public TodoResponse getTodo(long todoId) {
+
         Todo todo = todoRepository.findByIdWithUser(todoId)
                 .orElseThrow(() -> new InvalidRequestException("Todo not found"));
 
