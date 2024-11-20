@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -30,13 +31,7 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
 
-        String url = request.getRequestURI();
         String bearerJwt = request.getHeader("Authorization");
-
-        if (url.startsWith("/auth")) {
-            chain.doFilter(request, response);
-            return;
-        }
 
         if (bearerJwt == null) {
             // 토큰이 없는 경우 400을 반환합니다.
@@ -86,5 +81,8 @@ public class JwtFilter extends OncePerRequestFilter {
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 
-
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return StringUtils.startsWithIgnoreCase(request.getRequestURI(), "/auth");
+    }
 }
