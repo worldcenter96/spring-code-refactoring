@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -49,17 +50,17 @@ public class TodoService {
         );
     }
 
-    public Page<TodoResponse> getTodos(int page, int size, String weather, LocalDateTime startDate, LocalDateTime endDate) {
+    public Page<TodoResponse> getTodos(int page, int size, String weather, LocalDateTime fromDate, LocalDateTime toDate) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
         Page<Todo> todos = null;
 
         if (weather != null) {
             // weather 조건별 조회
-            todos = todoRepository.findByWeatherOrderByModifiedAtDesc(startDate, endDate, weather, pageable);
+            todos = todoRepository.findByWeatherOrderByModifiedAtDesc(fromDate, toDate, weather, pageable);
         } else {
             // 전체 조회 & 기간별 조회
-            todos = todoRepository.findAllByModifiedAtOrderByModifiedAtDesc(startDate, endDate, pageable);
+            todos = todoRepository.findAllByModifiedAtOrderByModifiedAtDesc(fromDate, toDate, pageable);
         }
 
         return todos.map(todo -> new TodoResponse(
